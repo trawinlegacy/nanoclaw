@@ -60,6 +60,7 @@ import {
   loadSenderAllowlist,
   shouldDropMessage,
 } from './sender-allowlist.js';
+import { startChiefMonitor } from './chief-monitor.js';
 import { startSchedulerLoop } from './task-scheduler.js';
 import { Channel, NewMessage, RegisteredGroup } from './types.js';
 import { logger } from './logger.js';
@@ -322,10 +323,13 @@ async function processGroupMessages(chatJid: string): Promise<boolean> {
       try {
         await channel.sendMessage(
           chatJid,
-          '⚠️ I ran into an issue finishing that task. The earlier response was sent but the task may not have completed. Let me know if you\'d like me to retry.',
+          "⚠️ I ran into an issue finishing that task. The earlier response was sent but the task may not have completed. Let me know if you'd like me to retry.",
         );
       } catch (notifyErr) {
-        logger.warn({ group: group.name, notifyErr }, 'Failed to send error notification');
+        logger.warn(
+          { group: group.name, notifyErr },
+          'Failed to send error notification',
+        );
       }
       return true;
     }
@@ -693,6 +697,18 @@ async function main(): Promise<void> {
       if (text) await channel.sendMessage(jid, text);
     },
   });
+  startChiefMonitor({
+    sendMessage: async (jid, rawText) => {
+      const channel = findChannel(channels, jid);
+      if (!channel) {
+        logger.warn({ jid }, 'Chief monitor: no channel for JID');
+        return;
+      }
+      await channel.sendMessage(jid, rawText);
+    },
+    registeredGroups: () => registeredGroups,
+  });
+
   startIpcWatcher({
     sendMessage: (jid, text) => {
       const channel = findChannel(channels, jid);

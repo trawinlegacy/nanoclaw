@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 
 import {
+  CHIEF_IDLE_TIMEOUT_MS,
   CONTAINER_IMAGE,
   CONTAINER_MAX_OUTPUT_SIZE,
   CONTAINER_TIMEOUT,
@@ -421,9 +422,13 @@ export async function runContainerAgent(
     let timedOut = false;
     let hadStreamingOutput = false;
     const configTimeout = group.containerConfig?.timeout || CONTAINER_TIMEOUT;
-    // Grace period: hard timeout must be at least IDLE_TIMEOUT + 30s so the
+    // Chief (main group) gets an extended idle timeout to survive long orchestration tasks.
+    const effectiveIdleTimeout = input.isMain
+      ? Math.max(IDLE_TIMEOUT, CHIEF_IDLE_TIMEOUT_MS)
+      : IDLE_TIMEOUT;
+    // Grace period: hard timeout must be at least effectiveIdleTimeout + 30s so the
     // graceful _close sentinel has time to trigger before the hard kill fires.
-    const timeoutMs = Math.max(configTimeout, IDLE_TIMEOUT + 30_000);
+    const timeoutMs = Math.max(configTimeout, effectiveIdleTimeout + 30_000);
 
     const killOnTimeout = () => {
       timedOut = true;

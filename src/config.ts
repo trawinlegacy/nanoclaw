@@ -59,6 +59,21 @@ export const MAX_MESSAGES_PER_PROMPT = Math.max(
 );
 export const IPC_POLL_INTERVAL = 1000;
 export const IDLE_TIMEOUT = parseInt(process.env.IDLE_TIMEOUT || '1800000', 10); // 30min default — how long to keep container alive after last result
+// Chief (main group) container idle timeout — defaults to 4h so it can monitor long-running tasks
+export const CHIEF_IDLE_TIMEOUT_MS = parseInt(
+  process.env.CHIEF_IDLE_TIMEOUT_MS || String(4 * 60 * 60 * 1000),
+  10,
+);
+// How long without a heartbeat before host sends a recovery nudge to Chief (default 2h)
+export const CHIEF_HEARTBEAT_STALE_MS = parseInt(
+  process.env.CHIEF_HEARTBEAT_STALE_MS || String(2 * 60 * 60 * 1000),
+  10,
+);
+// How often the chief monitor polls for stale heartbeats / timed-out tasks (default 5min)
+export const CHIEF_MONITOR_POLL_MS = parseInt(
+  process.env.CHIEF_MONITOR_POLL_MS || String(5 * 60 * 1000),
+  10,
+);
 export const MAX_CONCURRENT_CONTAINERS = Math.max(
   1,
   parseInt(process.env.MAX_CONCURRENT_CONTAINERS || '5', 10) || 5,

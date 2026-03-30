@@ -9,14 +9,20 @@ store/
 data/
 logs/
 
-# Groups - only track base structure and specific CLAUDE.md files
+# Groups - only track base structure and specific CLAUDE.md/SOUL.md files
 groups/*
 !groups/main/
 !groups/global/
+!groups/whatsapp_main/
 groups/main/*
 groups/global/*
+groups/whatsapp_main/*
 !groups/main/CLAUDE.md
 !groups/global/CLAUDE.md
+!groups/whatsapp_main/CLAUDE.md
+!groups/whatsapp_main/task-planner/
+groups/whatsapp_main/task-planner/*
+!groups/whatsapp_main/task-planner/SOUL.md
 
 # Secrets
 *.keys.json
