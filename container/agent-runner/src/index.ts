@@ -391,10 +391,14 @@ async function runQuery(
     log(`Additional directories: ${extraDirs.join(', ')}`);
   }
 
+  // Chief (main group) needs Sonnet for complex multi-agent orchestration;
+  // sub-groups use Haiku for speed and cost efficiency.
+  const model = containerInput.isMain ? 'claude-sonnet-4-5' : 'claude-haiku-4-5';
+
   for await (const message of query({
     prompt: stream,
     options: {
-      model: 'claude-haiku-4-5',
+      model,
       maxTurns: 100,
       cwd: '/workspace/group',
       additionalDirectories: extraDirs.length > 0 ? extraDirs : undefined,
