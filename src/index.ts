@@ -319,6 +319,14 @@ async function processGroupMessages(chatJid: string): Promise<boolean> {
         { group: group.name },
         'Agent error after output was sent, skipping cursor rollback to prevent duplicates',
       );
+      try {
+        await channel.sendMessage(
+          chatJid,
+          '⚠️ I ran into an issue finishing that task. The earlier response was sent but the task may not have completed. Let me know if you\'d like me to retry.',
+        );
+      } catch (notifyErr) {
+        logger.warn({ group: group.name, notifyErr }, 'Failed to send error notification');
+      }
       return true;
     }
     // Roll back cursor so retries can re-process these messages
@@ -395,11 +403,6 @@ async function runAgent(
         queue.registerProcess(chatJid, proc, containerName, group.folder),
       wrappedOnOutput,
     );
-
-    if (output.newSessionId) {
-      sessions[group.folder] = output.newSessionId;
-      setSession(group.folder, output.newSessionId);
-    }
 
     if (output.status === 'error') {
       logger.error(
